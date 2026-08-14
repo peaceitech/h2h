@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Track Your Shipment - Hand to Hand Express</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; background: #fff; }
+    iframe { display: block; width: 100%; height: 100vh; border: none; }
+    #loading {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #6b7280; font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading tracker…</div>
+  <iframe id="trackFrame" title="Track your shipment" onload="document.getElementById('loading').style.display='none'"></iframe>
+
+  <script>
+    // track.html?id=HTH-CAET-0048 -> pre-fills that ID in the Apps Script
+    // tracking page, so existing QR codes/email links keep working.
+    const BASE = 'https://script.google.com/macros/s/AKfycbzh_sDEvOK6by8d8FCUUAy9X1uUBzRbTYQKlpU5wn804BaS2yYOG_Y5n__Txq3IKiM1/exec?page=track';
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    document.getElementById('trackFrame').src = id ? `${BASE}&id=${encodeURIComponent(id)}` : BASE;
+  </script>
+</body>
+</html>
