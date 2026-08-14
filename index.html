@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <style>
+    :root {
+      --brand:        234 179 8;   /* yellow-500 */
+      --brand-light:  250 204 21;  /* yellow-400 */
+      --brand-dark:   161 98 7;    /* yellow-700 */
+      --ink:          17 24 39;    /* gray-900 */
+      --muted:        107 114 128; /* gray-500 */
+      --line:         229 231 235; /* gray-200 */
+      --line-light:   243 244 246; /* gray-100 */
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #fafafa;
+      color: rgb(var(--ink));
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    header.brand {
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header.brand .mark {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: rgb(var(--ink));
+      color: rgb(var(--brand-light));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 13px; letter-spacing: 0.02em;
+    }
+    header.brand h1 { font-size: 16px; margin: 0; font-weight: 800; color: rgb(var(--ink)); }
+    header.brand p { margin: 1px 0 0; font-size: 12px; color: rgb(var(--muted)); }
+
+    .layout {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    @media (min-width: 860px) {
+      .layout { grid-template-columns: 1fr 300px; align-items: start; }
+      .sidebar { position: sticky; top: 88px; }
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: rgb(var(--brand));
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    h2.page-title { font-size: 28px; font-weight: 800; margin: 0 0 6px; color: rgb(var(--ink)); letter-spacing: -0.01em; }
+    p.page-sub { color: rgb(var(--muted)); font-size: 14.5px; margin: 0 0 28px; max-width: 46ch; }
+
+    section.card {
+      background: #fff;
+      border: 1px solid rgb(var(--line-light));
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      border-radius: 18px;
+      padding: 24px 24px 26px;
+      margin-bottom: 18px;
+    }
+    .card-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px;
+    }
+    .card-head .num {
+      width: 30px; height: 30px; flex-shrink: 0;
+      border-radius: 999px;
+      background: rgb(var(--brand));
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 12.5px;
+    }
+    .card-head svg { width: 18px; height: 18px; color: rgb(var(--brand-dark)); flex-shrink: 0; }
+    .card-head h2 {
+      font-size: 13.5px; text-transform: uppercase; letter-spacing: 0.06em;
+      color: rgb(var(--ink)); margin: 0; font-weight: 700;
+    }
+
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 5px; color: rgb(var(--ink)); }
+
+    .field input, .field textarea, .field select {
+      width: 100%; padding: 11px 12px; border: 1px solid rgb(var(--line));
+      border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff; color: rgb(var(--ink));
+    }
+    .field select {
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'><path d='m6 9 6 6 6-6'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      outline: none; border-color: rgb(var(--brand));
+      box-shadow: 0 0 0 3px rgba(234,179,8,0.15);
+    }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .branch-readout {
+      border: 1px solid rgb(var(--line)); background: #fafafa; border-radius: 10px;
+      padding: 12px 14px; font-size: 13.5px;
+    }
+    .branch-readout strong { display: block; font-size: 14px; margin-bottom: 2px; }
+    .branch-readout .addr { color: rgb(var(--muted)); font-size: 12.5px; }
+
+    .dropoff-banner {
+      background: #fffbeb;
+      border: 1px solid rgb(var(--brand-light));
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 16px;
+      font-size: 13.5px;
+      color: rgb(var(--ink));
+    }
+    .dropoff-banner strong { display: block; margin-bottom: 3px; font-size: 14px; }
+
+    .item-row {
+      display: grid; grid-template-columns: 1fr 66px 66px auto; gap: 8px; align-items: end;
+      margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed rgb(var(--line));
+    }
+    .item-row:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .item-row .field { margin-bottom: 0; }
+    .remove-item { background: none; border: none; color: #dc2626; font-size: 18px; cursor: pointer; padding: 8px 2px; }
+    .add-item-btn {
+      background: none; border: 1.5px dashed rgb(var(--brand-dark)); color: rgb(var(--brand-dark));
+      border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 12px;
+    }
+    .total-kg { text-align: right; font-size: 13px; color: rgb(var(--muted)); margin-top: 10px; font-weight: 600; }
+
+    .terms { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: rgb(var(--muted)); margin: 4px 0 18px; }
+    .terms input { margin-top: 3px; accent-color: rgb(var(--brand)); }
+
+    button.submit {
+      width: 100%; background: rgb(var(--brand)); color: #fff; border: none; border-radius: 12px;
+      padding: 16px; font-size: 15px; font-weight: 700; letter-spacing: 0.01em; cursor: pointer; transition: background .15s;
+      box-shadow: 0 4px 14px rgba(234,179,8,0.28);
+    }
+    button.submit:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+    button.submit:hover:not(:disabled) { background: rgb(var(--brand-light)); }
+
+    #errorPanel { display: none; }
+    #errorPanel {
+      background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b;
+      border-radius: 12px; padding: 12px 14px; margin-top: 14px; font-size: 13px;
+    }
+
+    /* --- confirmation "ticket" --- */
+    #resultPanel { display: none; }
+    #resultPanel .ticket {
+      background: rgb(var(--ink));
+      color: #fff;
+      border-radius: 18px;
+      padding: 30px 26px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #resultPanel .ticket::before, #resultPanel .ticket::after {
+      content: ''; position: absolute; width: 26px; height: 26px; background: #fafafa; border-radius: 50%;
+      top: 50%; transform: translateY(-50%);
+    }
+    #resultPanel .ticket::before { left: -13px; }
+    #resultPanel .ticket::after { right: -13px; }
+    #resultPanel .checkmark {
+      width: 44px; height: 44px; border-radius: 999px; background: rgb(var(--brand));
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+    }
+    #resultPanel .checkmark svg { width: 22px; height: 22px; color: rgb(var(--ink)); }
+    #resultPanel .label-small { font-size: 11.5px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.08em; }
+    #resultPanel .tid { font-size: 26px; font-weight: 800; color: rgb(var(--brand-light)); letter-spacing: 0.04em; margin: 6px 0 16px; }
+    #resultPanel .divider { border-top: 1px dashed rgba(255,255,255,0.2); margin: 16px 0; }
+    #resultPanel .office { font-size: 13.5px; color: rgba(255,255,255,0.9); }
+
+    /* --- sidebar --- */
+    .sidebar-card {
+      background: #fff; border: 1px solid rgb(var(--line-light)); border-radius: 18px;
+      padding: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 16px;
+    }
+    .sidebar-card h3 {
+      font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em;
+      color: rgb(var(--brand-dark)); margin: 0 0 14px; font-weight: 700;
+    }
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+    .stat-row div { text-align: center; }
+    .stat-row .num { font-size: 18px; font-weight: 800; color: rgb(var(--ink)); }
+    .stat-row .lbl { font-size: 10.5px; color: rgb(var(--muted)); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
+    .trust-list { list-style: none; margin: 0; padding: 0; }
+    .trust-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: rgb(var(--ink)); margin-bottom: 12px; }
+    .trust-list li:last-child { margin-bottom: 0; }
+    .trust-list svg { width: 16px; height: 16px; color: rgb(var(--brand-dark)); flex-shrink: 0; margin-top: 2px; }
+
+    .contact-list { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+    .contact-list li { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .contact-list li:last-child { margin-bottom: 0; }
+    .contact-list svg { width: 15px; height: 15px; color: rgb(var(--brand-dark)); flex-shrink: 0; }
+    .contact-list a { color: rgb(var(--ink)); text-decoration: none; }
+    .contact-list a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header class="brand">
+    <div class="mark">H2H</div>
+    <div>
+      <h1>Hand to Hand Express</h1>
+      <p>Canada &harr; Ethiopia courier</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <span class="eyebrow">Request Delivery</span>
+      <h2 class="page-title">Send a package</h2>
+      <p class="page-sub">Fill in your details below — every step is tracked from drop-off to collection, with live updates by email.</p>
+
+      <form id="orderForm">
+
+        <section class="card">
+          <div class="card-head">
+            <span class="num">01</span>
+            <h2>Shipment Details</h2>
+          </div>
+
+          <div class="field">
+            <label for="directionSelect">Direction</label>
+            <select id="directionSelect" name="direction">
+              <option value="CAET">Canada &rarr; Ethiopia</option>
+              <option value="CAUG">Canada &rarr; Uganda</option>
+              <option value="ETCA">Ethiopia &rarr; Canada</option>
+            </select>
+          </div>
+
+          <div class="field" id="methodField">
+            <label for="methodSelect">How are you submitting this?</label>
+            <select id="methodSelect" name="submissionMethod">
+              <option value="remote">I'm filling this out now — will drop off later</option>
+              <option value="office">I'm at the branch, dropping off right now</option>
+            </select>
+          </div>
+
+          <div class="field" id="branchField">
+            <label for="branchSelect" id="branchLabel">Drop-off branch</label>
+            <select id="branchSelect" name="branchCode"></select>
+            <div id="branchReadoutWrap" style="display:none;"></div>
+          </div>
+
+          <div class="dropoff-banner" id="dropoffBanner"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <span class="num">02</span>
+            <h2>Sender</h2>
+          </div>
+          <div class="field"><label>Full Name</label><input required name="senderName"></div>
+          <div class="row2">
+            <div class="field"><label>Email</label><input required type="email" name="senderEmail"></div>
+            <div class="field"><label>Phone Number</label><input required type="tel" name="senderPhone"></div>
+          </div>
+          <div class="field"><label>Address</label><input required name="senderAddress"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <span class="num">03</span>
+            <h2>Items to send</h2>
+          </div>
+          <div id="itemsWrap"></div>
+          <button type="button" class="add-item-btn" id="addItemBtn">+ Add another item</button>
+          <div class="total-kg" id="totalKgLabel">Total: 0 kg</div>
+
+          <div class="field" style="margin-top:16px; padding-top:16px; border-top:1px dashed rgb(var(--line));">
+            <label for="photoInput">Photo of item (optional)</label>
+            <input type="file" id="photoInput" accept="image/*">
+            <div class="hint" id="photoHint" style="font-size:12px; color:rgb(var(--muted)); margin-top:4px;"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <span class="num">04</span>
+            <h2>Receiver</h2>
+          </div>
+          <div class="field"><label>Full Name</label><input required name="receiverName"></div>
+          <div class="row2">
+            <div class="field"><label>Phone Number</label><input required type="tel" name="receiverPhone"></div>
+            <div class="field"><label>Email (optional)</label><input type="email" name="receiverEmail"></div>
+          </div>
+          <div class="field"><label>Address</label><input required name="receiverAddress"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <span class="num">05</span>
+            <h2>Notes <span style="text-transform:none; font-weight:400; color:rgb(var(--muted));">(optional)</span></h2>
+          </div>
+          <div class="field"><textarea name="notes" rows="2" placeholder="Anything the office should know"></textarea></div>
+        </section>
+
+        <label class="terms">
+          <input type="checkbox" id="agreeBox" required>
+          <span>I confirm that the information provided is accurate. I understand that prohibited, illegal, dangerous, or restricted items are not accepted. I agree that Hand to Hand Express may contact me by email, phone, SMS, or WhatsApp regarding this shipment. I understand that delivery time may vary due to customs, airline, courier, or operational delays.</span>
+        </label>
+
+        <button type="submit" class="submit" id="submitBtn">Submit delivery request</button>
+
+        <div id="errorPanel"></div>
+      </form>
+
+      <div id="resultPanel">
+        <div class="ticket">
+          <div class="checkmark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div class="label-small">Request submitted &middot; Your tracking ID</div>
+          <div class="tid" id="resultTid"></div>
+          <div class="divider"></div>
+          <div class="office" id="resultOffice"></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h3>Why ship with H2H</h3>
+        <ul class="trust-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Same-day delivery — no overnight holds</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Live tracking from drop-off to collection</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg> Every package handled with care</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg> 24/7 support, real people answer</li>
+        </ul>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>By the numbers</h3>
+        <div class="stat-row">
+          <div><div class="num">10K+</div><div class="lbl">Deliveries</div></div>
+          <div><div class="num">24/7</div><div class="lbl">Support</div></div>
+          <div><div class="num">20+</div><div class="lbl">Cities</div></div>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Need help?</h3>
+        <ul class="contact-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> <a href="tel:+14379977533">+1 437 997 7533</a></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg> <a href="mailto:h2hexp2025@gmail.com">h2hexp2025@gmail.com</a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // Mirrors CONFIG.DIRECTIONS in Config.gs — keep these in sync if you edit branches there.
+    const CANADA_BRANCHES = {
+      HEAD: { name: 'Hand to Hand Express (Head Office)', address: '2017 Danforth Ave, Toronto, ON M4C 1J7' },
+      OSSI: { name: 'Ossington Branch', address: '884 Bloor St W, Toronto, ON M6G 1M5' }
+    };
+    const DIRECTIONS = {
+      CAET: {
+        label: 'Canada \u2192 Ethiopia',
+        allowRemote: true,
+        defaultBranch: 'HEAD',
+        branches: CANADA_BRANCHES
+      },
+      CAUG: {
+        label: 'Canada \u2192 Uganda',
+        allowRemote: true,
+        defaultBranch: 'HEAD',
+        branches: CANADA_BRANCHES
+      },
+      ETCA: {
+        label: 'Ethiopia \u2192 Canada',
+        allowRemote: false,
+        defaultBranch: 'ADD',
+        branches: {
+          ADD: { name: 'Hand to Hand Express Addis Ababa', address: 'Bole, Alemenesh Plaza, 7th Floor, Addis Ababa, Ethiopia' }
+        }
+      }
+    };
+
+    let itemCount = 0;
+
+    function addItemRow() {
+      itemCount++;
+      const id = itemCount;
+      const wrap = document.getElementById('itemsWrap');
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.dataset.id = id;
+      row.innerHTML = `
+        <div class="field"><label>Description</label><input required name="item-desc-${id}" placeholder="e.g. Clothes"></div>
+        <div class="field"><label>Qty</label><input required type="number" min="1" value="1" name="item-qty-${id}"></div>
+        <div class="field"><label>KG</label><input required type="number" step="0.1" min="0.1" name="item-kg-${id}" class="kg-input"></div>
+        <button type="button" class="remove-item" title="Remove item">&times;</button>
+      `;
+      row.querySelector('.remove-item').addEventListener('click', () => {
+        if (document.querySelectorAll('.item-row').length > 1) {
+          row.remove();
+          updateTotalKg();
+        }
+      });
+      row.querySelector('.kg-input').addEventListener('input', updateTotalKg);
+      wrap.appendChild(row);
+    }
+
+    function updateTotalKg() {
+      const kgInputs = document.querySelectorAll('.kg-input');
+      let total = 0;
+      kgInputs.forEach(i => total += parseFloat(i.value) || 0);
+      document.getElementById('totalKgLabel').textContent = `Total: ${total.toFixed(1)} kg`;
+    }
+
+    document.getElementById('addItemBtn').addEventListener('click', addItemRow);
+    addItemRow();
+
+    const directionSelect = document.getElementById('directionSelect');
+    const methodField = document.getElementById('methodField');
+    const methodSelect = document.getElementById('methodSelect');
+    const branchField = document.getElementById('branchField');
+    const branchLabel = document.getElementById('branchLabel');
+    const branchSelect = document.getElementById('branchSelect');
+    const branchReadoutWrap = document.getElementById('branchReadoutWrap');
+    const dropoffBanner = document.getElementById('dropoffBanner');
+
+    function currentDirCfg() {
+      return DIRECTIONS[directionSelect.value];
+    }
+
+    function currentMethod() {
+      return currentDirCfg().allowRemote ? methodSelect.value : 'office';
+    }
+
+    function refreshForm() {
+      const dirCfg = currentDirCfg();
+
+      methodField.style.display = dirCfg.allowRemote ? 'block' : 'none';
+
+      const codes = Object.keys(dirCfg.branches);
+      if (codes.length > 1) {
+        branchSelect.style.display = 'block';
+        branchReadoutWrap.style.display = 'none';
+        branchLabel.textContent = 'Drop-off branch';
+        branchSelect.innerHTML = codes.map(code => {
+          const b = dirCfg.branches[code];
+          return `<option value="${code}">${b.name} — ${b.address}</option>`;
+        }).join('');
+        branchSelect.value = dirCfg.defaultBranch;
+      } else {
+        branchSelect.style.display = 'none';
+        branchReadoutWrap.style.display = 'block';
+        branchLabel.textContent = 'Office location';
+        const code = codes[0];
+        const b = dirCfg.branches[code];
+        branchReadoutWrap.innerHTML = `<div class="branch-readout"><strong>${b.name}</strong><span class="addr">${b.address}</span></div>`;
+      }
+
+      updateDropoffBanner();
+    }
+
+    function selectedBranch() {
+      const dirCfg = currentDirCfg();
+      const codes = Object.keys(dirCfg.branches);
+      const code = codes.length > 1 ? branchSelect.value : codes[0];
+      return { code, branch: dirCfg.branches[code] };
+    }
+
+    function updateDropoffBanner() {
+      const { branch } = selectedBranch();
+      const method = currentMethod();
+
+      if (method === 'office') {
+        dropoffBanner.innerHTML = `<strong>Filling out at: ${branch.name}</strong>${branch.address}<br>Your item will be marked as dropped off as soon as you submit.`;
+      } else {
+        dropoffBanner.innerHTML = `<strong>Drop-off: ${branch.name}</strong>${branch.address}<br>Please bring your item here. Your tracking ID will be used to identify your package.`;
+      }
+    }
+
+    directionSelect.addEventListener('change', refreshForm);
+    methodSelect.addEventListener('change', updateDropoffBanner);
+    branchSelect.addEventListener('change', updateDropoffBanner);
+    refreshForm();
+
+    // Resizes/compresses a selected photo client-side before it's sent —
+    // keeps uploads fast and comfortably under size limits (Telegram,
+    // Apps Script, and the reverse proxy all cap request size).
+    function compressImage(file, maxDim, quality) {
+      return new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            let width = img.width, height = img.height;
+            if (width > height && width > maxDim) {
+              height = Math.round(height * (maxDim / width));
+              width = maxDim;
+            } else if (height > maxDim) {
+              width = Math.round(width * (maxDim / height));
+              height = maxDim;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById('photoInput').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      document.getElementById('photoHint').textContent = file ? `Selected: ${file.name}` : '';
+    });
+
+    document.getElementById('orderForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const errorPanel = document.getElementById('errorPanel');
+      errorPanel.style.display = 'none';
+
+      const form = e.target;
+      const items = [];
+      document.querySelectorAll('.item-row').forEach(row => {
+        const id = row.dataset.id;
+        items.push({
+          desc: form[`item-desc-${id}`].value,
+          qty: form[`item-qty-${id}`].value,
+          kg: form[`item-kg-${id}`].value
+        });
+      });
+
+      const { code: branchCode } = selectedBranch();
+
+      const data = {
+        direction: directionSelect.value,
+        branchCode: branchCode,
+        submissionMethod: currentMethod(),
+        senderName: form.senderName.value,
+        senderEmail: form.senderEmail.value,
+        senderPhone: form.senderPhone.value,
+        senderAddress: form.senderAddress.value,
+        receiverName: form.receiverName.value,
+        receiverPhone: form.receiverPhone.value,
+        receiverAddress: form.receiverAddress.value,
+        receiverEmail: form.receiverEmail.value,
+        notes: form.notes.value,
+        items: items,
+        photoBase64: null,
+        photoMimeType: null
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+
+      const photoFile = document.getElementById('photoInput').files[0];
+      if (photoFile) {
+        btn.textContent = 'Processing photo...';
+        try {
+          const dataUrl = await compressImage(photoFile, 1280, 0.7);
+          data.photoBase64 = dataUrl.split(',')[1];
+          data.photoMimeType = 'image/jpeg';
+        } catch (err) {
+          errorPanel.textContent = 'Could not process the photo — try a different image or leave it blank.';
+          errorPanel.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Submit delivery request';
+          return;
+        }
+      }
+
+      btn.textContent = 'Submitting...';
+
+      // Works correctly in BOTH places:
+      //  - Opened directly at script.google.com (quick testing) -> google.script.run
+      //  - Served through the Vercel reverse proxy (production, hides the
+      //    Google URL) -> fetch('/api/submit-order'), since google.script.run
+      //    doesn't function outside Google's own domain.
+      const onAppsScript = /(^|\.)google(usercontent)?\.com$/.test(window.location.hostname);
+
+      function handleSuccess(res) {
+        if (!res.success) {
+          throw new Error(res.error || 'Submission failed');
+        }
+        form.style.display = 'none';
+        document.getElementById('resultPanel').style.display = 'block';
+        document.getElementById('resultTid').textContent = res.trackingId;
+        document.getElementById('resultOffice').textContent = res.status === 'Dropped Off'
+          ? `Marked as dropped off at ${res.office.name} — ${res.office.address}`
+          : `Drop off at ${res.office.name} — ${res.office.address}`;
+      }
+
+      function handleFailure(err) {
+        btn.disabled = false;
+        btn.textContent = 'Submit delivery request';
+        errorPanel.textContent = 'Something went wrong: ' + (err.message || err);
+        errorPanel.style.display = 'block';
+      }
+
+      if (onAppsScript) {
+        google.script.run
+          .withSuccessHandler(handleSuccess)
+          .withFailureHandler(handleFailure)
+          .submitOrder(data);
+      } else {
+        fetch('/api/submit-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        })
+          .then(function (r) { return r.json(); })
+          .then(handleSuccess)
+          .catch(handleFailure);
+      }
+    });
+  </script>
+</body>
+</html>
