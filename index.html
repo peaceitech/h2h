@@ -255,6 +255,14 @@
             </select>
           </div>
 
+          <div class="field" id="shippingField">
+            <label for="shippingSelect">Shipping option</label>
+            <select id="shippingSelect" name="shippingMethod">
+              <option value="normal">Normal — about 8 days</option>
+              <option value="express">🚨 Express — about 4 days</option>
+            </select>
+          </div>
+
           <div class="field" id="methodField">
             <label for="methodSelect">How are you submitting this?</label>
             <select id="methodSelect" name="submissionMethod">
@@ -564,6 +572,7 @@
         direction: directionSelect.value,
         branchCode: branchCode,
         submissionMethod: currentMethod(),
+        shippingMethod: document.getElementById('shippingSelect').value,
         senderName: form.senderName.value,
         senderEmail: form.senderEmail.value,
         senderPhone: form.senderPhone.value,
@@ -636,7 +645,12 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         })
-          .then(function (r) { return r.json(); })
+          .then(function (r) {
+            return r.text().then(function (t) {
+              try { return JSON.parse(t); }
+              catch (e) { throw new Error('Server returned HTTP ' + r.status + ' from ' + window.location.host + '/api/submit-order (not JSON): ' + t.replace(/<[^>]*>/g, ' ').trim().slice(0, 120)); }
+            });
+          })
           .then(handleSuccess)
           .catch(handleFailure);
       }
