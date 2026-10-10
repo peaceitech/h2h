@@ -26,14 +26,30 @@
     .search-box button { background: rgb(var(--brand)); color:#fff; border:none; border-radius:10px; padding: 0 18px; font-weight:700; cursor:pointer; font-size: 14px; }
     .search-box button:hover { background: rgb(var(--brand-light)); }
     .card { background:#fff; border:1px solid #f3f4f6; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border-radius: 16px; padding: 22px; }
-    .status-badge { display:inline-block; padding: 5px 14px; border-radius: 999px; background: rgb(var(--brand)); color:#fff; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 14px; }
-    .tid { font-size: 21px; font-weight: 800; margin-bottom: 4px; }
-    .meta-row { display:flex; justify-content: space-between; font-size: 13.5px; padding: 9px 0; border-bottom: 1px dashed rgb(var(--line)); }
-    .meta-row:last-child { border-bottom:none; }
+    .status-badge { display:inline-block; padding: 5px 14px; border-radius: 999px; background: rgb(var(--ink)); color:rgb(var(--brand-light)); font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; }
+    .chip-exp { display:inline-block; margin-left:6px; padding:5px 12px; border-radius:999px; background:#fee2e2; color:#b91c1c; font-weight:700; font-size:12px; }
+    .tid { font-size: 20px; font-weight: 800; margin: 12px 0 2px; }
+    .route { font-size:13.5px; color: rgb(var(--muted)); }
+    .eta { margin: 16px 0 6px; padding:16px; border-radius:14px; background: rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.35); }
+    .eta .k { font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color: rgb(var(--brand-dark)); }
+    .eta .v { font-size:22px; font-weight:800; margin-top:2px; }
+    .eta .s { font-size:12px; color: rgb(var(--muted)); margin-top:2px; }
+    .meta-row { display:flex; justify-content: space-between; gap:12px; font-size: 13.5px; padding: 9px 0; border-bottom: 1px dashed rgb(var(--line)); }
+    .meta-row:last-of-type { border-bottom:none; }
     .meta-row .label { color: rgb(var(--muted)); }
-    .steps { display:flex; flex-wrap: wrap; gap: 6px; margin-top:16px; }
-    .step { font-size: 11px; padding: 4px 10px; border-radius: 999px; background: #f3f4f6; color: rgb(var(--muted)); font-weight: 600; }
-    .step.done { background: rgb(var(--brand)); color: #fff; }
+    .meta-row span:last-child { text-align:right; }
+    .tl { list-style:none; margin: 18px 0 0; padding:0; }
+    .tl li { position:relative; padding: 0 0 20px 30px; }
+    .tl li:last-child { padding-bottom:0; }
+    .tl li::before { content:''; position:absolute; left:8px; top:18px; bottom:-2px; width:2px; background: rgb(var(--line)); }
+    .tl li:last-child::before { display:none; }
+    .tl li.done::before { background: rgb(var(--brand)); }
+    .dot { position:absolute; left:0; top:2px; width:18px; height:18px; border-radius:50%; background:#fff; border:2px solid rgb(var(--line)); }
+    .tl li.done .dot { background: rgb(var(--brand)); border-color: rgb(var(--brand)); }
+    .tl li.current .dot { background:#fff; border-color: rgb(var(--brand)); box-shadow: 0 0 0 4px rgba(234,179,8,0.25); }
+    .tl .nm { font-size:14px; font-weight:700; }
+    .tl li.upcoming .nm { color: rgb(var(--muted)); font-weight:600; }
+    .tl .tm { font-size:12.5px; color: rgb(var(--muted)); margin-top:1px; }
     .empty, .not-found { color: rgb(var(--muted)); font-size: 14px; text-align:center; padding: 30px 10px; }
   </style>
 </head>
@@ -54,37 +70,46 @@
   </main>
 
   <script>
-    // Mirrors CONFIG.DIRECTIONS labels in Config.gs.
-    const DIRECTION_LABELS = {
-      CAET: 'Canada \u2192 Ethiopia',
-      CAUG: 'Canada \u2192 Uganda',
-      ETCA: 'Ethiopia \u2192 Canada'
-    };
-    const STEPS = ['Submitted','Dropped Off','Paid','Ready to Ship','Shipped','Arrived','Collected'];
+    function esc(v) {
+      return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+        return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+      });
+    }
 
-    function render(order) {
+    function render(o) {
       const result = document.getElementById('result');
-      if (!order) {
+      if (!o) {
         result.innerHTML = '<div class="not-found">No order found for that tracking ID. Double-check and try again.</div>';
         return;
       }
-      const currentIdx = STEPS.indexOf(order.status);
-      const stepsHtml = STEPS.map((s, i) =>
-        `<span class="step ${i <= currentIdx ? 'done' : ''}">${s}</span>`
-      ).join('');
-      const directionLabel = DIRECTION_LABELS[order.direction] || order.direction;
+      let eta = '';
+      if (o.delivered) {
+        eta = '<div class="eta"><div class="k">Delivered</div><div class="v">' + esc(o.delivered) + '</div></div>';
+      } else if (o.estimatedDelivery) {
+        eta = '<div class="eta"><div class="k">Estimated delivery</div><div class="v">' + esc(o.estimatedDelivery) +
+              '</div><div class="s">' + esc(o.shippingLabel) + ' shipping \u00b7 updates as your package moves</div></div>';
+      } else if (o.cancelled) {
+        eta = '<div class="eta"><div class="k">Status</div><div class="v">Cancelled</div></div>';
+      }
+      const steps = (o.steps || []).map(function (s) {
+        const t = s.time ? esc(s.time) : (s.expected ? 'Expected ' + esc(s.expected) : '');
+        return '<li class="' + esc(s.state) + '"><span class="dot"></span><div class="nm">' + esc(s.name) +
+               '</div>' + (t ? '<div class="tm">' + t + '</div>' : '') + '</li>';
+      }).join('');
 
-      result.innerHTML = `
-        <div class="card">
-          <div class="status-badge">${order.status}</div>
-          <div class="tid">${order.trackingID}</div>
-          <div class="meta-row"><span class="label">Direction</span><span>${directionLabel}</span></div>
-          <div class="meta-row"><span class="label">Receiver</span><span>${order.receiverName}</span></div>
-          <div class="meta-row"><span class="label">Total weight</span><span>${order.totalKG} kg</span></div>
-          <div class="meta-row"><span class="label">Drop-off office</span><span>${order.dropOffOffice}</span></div>
-          <div class="steps">${stepsHtml}</div>
-        </div>
-      `;
+      result.innerHTML =
+        '<div class="card">' +
+          '<span class="status-badge">' + esc(o.status) + '</span>' +
+          (o.express ? '<span class="chip-exp">\ud83d\udea8 Express</span>' : '') +
+          '<div class="tid">' + esc(o.trackingID) + '</div>' +
+          '<div class="route">' + esc(o.directionLabel) + '</div>' +
+          eta +
+          '<div class="meta-row"><span class="label">Receiver</span><span>' + esc(o.receiverName) + '</span></div>' +
+          '<div class="meta-row"><span class="label">Total weight</span><span>' + esc(o.totalKG) + ' kg</span></div>' +
+          '<div class="meta-row"><span class="label">Drop-off office</span><span>' + esc(o.dropOffOffice) + '</span></div>' +
+          '<div class="meta-row"><span class="label">Last update</span><span>' + esc(o.lastUpdated) + '</span></div>' +
+          '<ul class="tl">' + steps + '</ul>' +
+        '</div>';
     }
 
     function doSearch() {
@@ -104,7 +129,7 @@
         })
         .catch(function (err) {
           document.getElementById('result').innerHTML =
-            '<div class="not-found">Something went wrong: ' + (err.message || err) + '</div>';
+            '<div class="not-found">Something went wrong: ' + esc(err.message || err) + '</div>';
         });
     }
 
